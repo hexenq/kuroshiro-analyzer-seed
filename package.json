@@ -1,0 +1,22 @@
+{
+    "name": "kuroshiro-analyzer-seed",
+    "version": "0.1.0",
+    "description": "seed for building morphological analyzer",
+    "main": "src/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "kuroshiro",
+        "analyzer",
+        "seed"
+    ],
+    "author": "Hexen Qi",
+    "license": "MIT",
+    "dependencies": {},
+    "devDependencies": {
+        "babel-core": "^6.26.0",
+        "babel-polyfill": "^6.26.0",
+        "babel-preset-env": "^1.6.1"
+    }
+}
