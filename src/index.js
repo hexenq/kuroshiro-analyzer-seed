@@ -1,6 +1,19 @@
+// Check where we are
+let isNode = false;
+const isBrowser = (typeof window !== "undefined");
+if (!isBrowser && typeof module !== "undefined" && module.exports) {
+    isNode = true;
+}
+
+/**
+ * Seed Analyzer
+ */
 class Analyzer {
+    /**
+     * Constructor
+     */
     constructor() {
-        this.isInitialized = false;
+        this._analyzer = null;
         // Variable Statement
         // ...
         //  if(isNode) { ... }
@@ -8,26 +21,32 @@ class Analyzer {
         // ...
     }
 
-    init(callback = () => {}) {
-        if (this.isInitialized == false) {
-            // Initialize the analyzer
-            // ...
-            // When finished, call back
-            this.isInitialized = true;
-            callback();
-        } else {
-            callback(new Error("This analyzer has already been initialized."));
-        }
+    /**
+     * Initialize the analyzer
+     * @returns {Promise} Promise object represents the result of initialization
+     */
+    init() {
+        return new Promise((resolve, reject) => {
+            if (this._analyzer == null) {
+                // Initialize the analyzer
+                // ...
+                // When finished, set new analyzer and call resolve
+                this._analyzer = "newAnalyzer";
+                resolve();
+            } else {
+                reject(new Error("This analyzer has already been initialized."));
+            }
+        });
     }
 
     /**
-     * Parse the input string
+     * Parse the given string
      * @param {*} str input string
-     * @param {*} callback callback function invoked after parsing
-     * @example output
-     * {
+     * @returns {Promise} Promise object represents the result of parsing
+     * @example The standard of the output
+     * [{
      *     surface_form: '黒白',    // [Required] 表層形
-     *     pos: '名詞',               // 品詞 (part of speech)
+     *     pos: '名詞',               // 品詞 (Part Of Speech)
      *     pos_detail_1: '一般',      // 品詞細分類1
      *     pos_detail_2: '*',        // 品詞細分類2
      *     pos_detail_3: '*',        // 品詞細分類3
@@ -35,15 +54,18 @@ class Analyzer {
      *     conjugated_form: '*',     // 活用形
      *     basic_form: '黒白',      // 基本形
      *     reading: 'クロシロ',       // [Required] 読み
-     *     pronunciation: 'クロシロ'  // 発音
-     * }
+     *     pronunciation: 'クロシロ',  // 発音
+     *     verbose: { }               // Other properties (Customized)
+     * }]
      */
-    parse(str = "", callback = () => {}) {
-        // Parse the input string
-        // ...
-        callback(null, {
-            surface_form: '黒白',
-            reading: 'クロシロ'
+    parse(str = "") {
+        return new Promise((resolve, reject) => {
+            // Parse the input string
+            // ...
+            resolve([{
+                surface_form: '黒白',
+                reading: 'クロシロ'
+            }]);
         });
     }
 }
