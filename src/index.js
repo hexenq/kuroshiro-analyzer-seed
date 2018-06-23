@@ -31,9 +31,15 @@ class Analyzer {
                 // Initialize the analyzer
                 // ...
                 // When finished, set new analyzer and call resolve
-                this._analyzer = "newAnalyzer";
+                this._analyzer = {
+                    analyze: () => [{
+                        surface_form: "黒白",
+                        reading: "クロシロ"
+                    }]
+                };
                 resolve();
-            } else {
+            }
+            else {
                 reject(new Error("This analyzer has already been initialized."));
             }
         });
@@ -62,10 +68,8 @@ class Analyzer {
         return new Promise((resolve, reject) => {
             // Parse the input string
             // ...
-            resolve([{
-                surface_form: '黒白',
-                reading: 'クロシロ'
-            }]);
+            const result = this._analyzer.analyze();
+            resolve(result);
         });
     }
 }
