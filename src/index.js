@@ -59,9 +59,21 @@ class Analyzer {
      *     conjugated_type: '*',     // 活用型
      *     conjugated_form: '*',     // 活用形
      *     basic_form: '黒白',      // 基本形
-     *     reading: 'クロシロ',       // [Required] 読み
+     *     reading: 'クロシロ',       // [Required if japanese token] 読み
      *     pronunciation: 'クロシロ',  // 発音
      *     verbose: { }               // Other properties (Customized)
+     * }]
+     *
+     * @example Output example of a space character
+     * [{
+     *     surface_form: ' ',    // [Required] 表層形
+     *     pos: '記号',               // 品詞 (Part Of Speech)
+     *     pos_detail_1: '空白',      // 品詞細分類1
+     *     pos_detail_2: '*',        // 品詞細分類2
+     *     pos_detail_3: '*',        // 品詞細分類3
+     *     conjugated_type: '*',     // 活用型
+     *     conjugated_form: '*',     // 活用形
+     *     basic_form: '*',      // 基本形
      * }]
      */
     parse(str = "") {
