@@ -1,6 +1,6 @@
 {
     "name": "kuroshiro-analyzer-seed",
-    "version": "0.5.1",
+    "version": "1.0.0",
     "description": "seed/example for building morphological analyzer",
     "main": "lib/index.js",
     "module": "src/index.js",

@@ -2,7 +2,7 @@
  
 [![Build Status](https://travis-ci.com/hexenq/kuroshiro-analyzer-seed.svg?branch=master)](https://travis-ci.org/hexenq/kuroshiro-analyzer-seed)
 [![Coverage Status](https://coveralls.io/repos/github/hexenq/kuroshiro-analyzer-seed/badge.svg?branch=master)](https://coveralls.io/github/hexenq/kuroshiro-analyzer-seed?branch=master)
-<!-- [![npm version](https://badge.fury.io/js/kuroshiro-analyzer-seed.svg)](http://badge.fury.io/js/kuroshiro-analyzer-seed)) -->
+[![npm version](https://badge.fury.io/js/kuroshiro-analyzer-seed.svg)](http://badge.fury.io/js/kuroshiro-analyzer-seed))
 
 <table>
     <tr>
