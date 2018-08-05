@@ -1,6 +1,6 @@
 {
     "name": "kuroshiro-analyzer-seed",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "seed/example for building morphological analyzer",
     "main": "lib/index.js",
     "module": "src/index.js",
@@ -14,8 +14,8 @@
         "clean": "rimraf lib dist",
         "build": "npm run build:cjs && npm run build:umd && npm run build:umd:min",
         "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir lib",
-        "build:umd": "cross-env BABEL_ENV=umd NODE_ENV=development browserify src/index.js -s SeedAnalyzer -o dist/SeedAnalyzer.js -t [ babelify ]",
-        "build:umd:min": "cross-env BABEL_ENV=umd NODE_ENV=production browserify src/index.js -s SeedAnalyzer -g uglifyify -o dist/SeedAnalyzer.min.js -t [ babelify ]"
+        "build:umd": "cross-env BABEL_ENV=umd NODE_ENV=development browserify src/index.js -s SeedAnalyzer -o dist/kuroshiro-analyzer-seed.js -t [ babelify ]",
+        "build:umd:min": "cross-env BABEL_ENV=umd NODE_ENV=production browserify src/index.js -s SeedAnalyzer -g uglifyify -o dist/kuroshiro-analyzer-seed.min.js -t [ babelify ]"
     },
     "keywords": [
         "kuroshiro",
