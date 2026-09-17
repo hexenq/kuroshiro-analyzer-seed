@@ -1,87 +1,91 @@
-// Check where we are
-let isNode = false;
-const isBrowser = (typeof window !== "undefined");
-if (!isBrowser && typeof module !== "undefined" && module.exports) {
-    isNode = true;
-}
-
 /**
- * Seed Analyzer
+ * Starting point for a custom kuroshiro analyzer, NOT a general tokenizer.
+ * Replace the sample engine in init() with your tokenizer and field mapping.
  */
 class Analyzer {
-    /**
-     * Constructor
-     */
     constructor() {
         this._analyzer = null;
-        // Variable Statement
-        // ...
-        //  if(isNode) { ... }
-        //  else { ... }
-        // ...
     }
 
-    /**
-     * Initialize the analyzer
-     * @returns {Promise} Promise object represents the result of initialization
-     */
+    /** Initialize resources once. Resolve when parse() is ready to use. */
     init() {
-        return new Promise((resolve, reject) => {
-            if (this._analyzer == null) {
-                // Initialize the analyzer
-                // ...
-                // When finished, set new analyzer and call resolve
-                this._analyzer = {
-                    analyze: () => [{
-                        surface_form: "黒白",
-                        reading: "クロシロ"
-                    }]
-                };
-                resolve();
+        return Promise.resolve().then(() => {
+            if (this._analyzer !== null) {
+                throw new Error("This analyzer has already been initialized.");
             }
-            else {
-                reject(new Error("This analyzer has already been initialized."));
-            }
+            // Demonstration only: recognize 黒白 and preserve whitespace.
+            // Real adapters should initialize their dictionary/service here.
+            this._analyzer = {
+                analyze: str => str.split(/(\s+)/).filter(part => part.length > 0).map((part) => {
+                    if (/^\s+$/.test(part)) {
+                        return { surface_form: part, pos: "記号", pos_detail_1: "空白" };
+                    }
+                    if (part !== "黒白") {
+                        throw new Error("The seed only recognizes 黒白 and whitespace. Replace the sample tokenizer to handle other text.");
+                    }
+                    return {
+                        surface_form: part,
+                        pos: "名詞",
+                        basic_form: part,
+                        reading: "クロシロ",
+                        pronunciation: "クロシロ"
+                    };
+                })
+            };
         });
     }
 
     /**
-     * Parse the given string
-     * @param {*} str input string
-     * @returns {Promise} Promise object represents the result of parsing
-     * @example The standard of the output
+     * Return a Promise of fresh, ordered tokens without dropping input.
+     * @param {string} [str=""] Input text
+     * @returns {Promise<Array>} Tokens in kuroshiro's analyzer format
+     *
+     * Map your tokenizer's output to the fields below. Only surface_form and
+     * reading (for Japanese tokens) are required; other fields are metadata
+     * to supply when available. The sample engine does not use a dictionary.
+     *
+     * @example Japanese token with optional metadata
      * [{
-     *     surface_form: '黒白',    // [Required] 表層形
-     *     pos: '名詞',               // 品詞 (Part Of Speech)
-     *     pos_detail_1: '一般',      // 品詞細分類1
-     *     pos_detail_2: '*',        // 品詞細分類2
-     *     pos_detail_3: '*',        // 品詞細分類3
-     *     conjugated_type: '*',     // 活用型
-     *     conjugated_form: '*',     // 活用形
-     *     basic_form: '黒白',      // 基本形
-     *     reading: 'クロシロ',       // [Required if japanese token] 読み
-     *     pronunciation: 'クロシロ',  // 発音
-     *     verbose: { }               // Other properties (Customized)
+     *     surface_form: "黒白",       // [Required] 表層形 (original text)
+     *     pos: "名詞",                // 品詞 (part of speech)
+     *     pos_detail_1: "一般",       // 品詞細分類1
+     *     pos_detail_2: "*",          // 品詞細分類2
+     *     pos_detail_3: "*",          // 品詞細分類3
+     *     conjugated_type: "*",       // 活用型 (conjugation type)
+     *     conjugated_form: "*",       // 活用形 (conjugation form)
+     *     basic_form: "黒白",         // 基本形 (base form)
+     *     reading: "クロシロ",        // [Required for Japanese tokens] 読み
+     *     pronunciation: "クロシロ",  // 発音 (pronunciation)
+     *     verbose: {}                 // Additional engine-specific data
      * }]
      *
-     * @example Output example of a space character
+     * @example Whitespace token (no reading required)
      * [{
-     *     surface_form: ' ',    // [Required] 表層形
-     *     pos: '記号',               // 品詞 (Part Of Speech)
-     *     pos_detail_1: '空白',      // 品詞細分類1
-     *     pos_detail_2: '*',        // 品詞細分類2
-     *     pos_detail_3: '*',        // 品詞細分類3
-     *     conjugated_type: '*',     // 活用型
-     *     conjugated_form: '*',     // 活用形
-     *     basic_form: '*',      // 基本形
+     *     surface_form: " ",
+     *     pos: "記号",
+     *     pos_detail_1: "空白",
+     *     pos_detail_2: "*",
+     *     pos_detail_3: "*",
+     *     conjugated_type: "*",
+     *     conjugated_form: "*",
+     *     basic_form: "*"
      * }]
+     *
+     * Preserve token order and whitespace so surface_form values reconstruct
+     * the input. Return fresh arrays and objects: kuroshiro may modify them.
      */
     parse(str = "") {
-        return new Promise((resolve, reject) => {
-            // Parse the input string
-            // ...
-            const result = this._analyzer.analyze();
-            resolve(result);
+        // A Promise chain propagates both synchronous engine errors and
+        // rejected asynchronous engine results to kuroshiro's caller.
+        return Promise.resolve().then(() => {
+            if (typeof str !== "string") {
+                throw new TypeError("Input must be a string.");
+            }
+            if (this._analyzer === null) {
+                throw new Error("Initialize the analyzer before parsing.");
+            }
+            if (str.length === 0) return [];
+            return this._analyzer.analyze(str);
         });
     }
 }
