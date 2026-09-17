@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.x, 24.x]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm pack --dry-run
+      - name: Check out maintained kuroshiro for joint testing
+        uses: actions/checkout@v7
+        with:
+          repository: hexenq/kuroshiro
+          ref: f54ad5cdf9c8706e3090b9080e006abe9e59a075
+          path: tmp/core
+      - name: Build maintained core
+        working-directory: tmp/core
+        run: npm ci && npm run build
+      - name: Test with maintained core
+        env:
+          KUROSHIRO_PACKAGE: ${{ github.workspace }}/tmp/core
+        run: npm run test:joint
