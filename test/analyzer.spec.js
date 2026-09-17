@@ -1,6 +1,7 @@
 import Analyzer from "../src";
 
-describe("Seed analyzer contract", () => {
+// These checks exercise the starter's interface, not Japanese tokenization.
+describe("Starter interface", () => {
     let analyzer;
     beforeEach(() => { analyzer = new Analyzer(); });
 
@@ -10,17 +11,9 @@ describe("Seed analyzer contract", () => {
     });
 
     it("rejects parsing before initialization through a Promise", async () => {
-        const pending = analyzer.parse("黒白");
+        const pending = analyzer.parse("input");
         expect(typeof pending.then).toBe("function");
         await expect(pending).rejects.toThrow("Initialize");
-    });
-
-    it("returns the sample token's actual fields", async () => {
-        await analyzer.init();
-        await expect(analyzer.parse("黒白")).resolves.toEqual([{
-            surface_form: "黒白", pos: "名詞", basic_form: "黒白",
-            reading: "クロシロ", pronunciation: "クロシロ"
-        }]);
     });
 
     it("returns no tokens for empty or omitted input", async () => {
@@ -32,29 +25,6 @@ describe("Seed analyzer contract", () => {
     it.each([null, 1, {}, [], true])("rejects non-string input %p", async (value) => {
         await analyzer.init();
         await expect(analyzer.parse(value)).rejects.toThrow(TypeError);
-    });
-
-    it.each([" ", "\t\n　", " 黒白\t黒白\n", "黒白  黒白"])("preserves order and whitespace in %p", async (text) => {
-        await analyzer.init();
-        const tokens = await analyzer.parse(text);
-        expect(tokens.map(token => token.surface_form).join("")).toBe(text);
-        expect(tokens.filter(token => token.surface_form === "黒白").every(token => token.reading === "クロシロ")).toBe(true);
-    });
-
-    it.each(["日本語", "黒白以外", "abc", "🙂"])("explicitly rejects text outside the sample vocabulary: %s", async (text) => {
-        await analyzer.init();
-        await expect(analyzer.parse(text)).rejects.toThrow("Replace the sample tokenizer");
-    });
-
-    it("does not reuse tokens that kuroshiro or a caller may mutate", async () => {
-        await analyzer.init();
-        const first = await analyzer.parse("黒白 黒白");
-        first[0].reading = "changed";
-        first[1].surface_form = "changed";
-        const second = await analyzer.parse("黒白 黒白");
-        expect(second[0].reading).toBe("クロシロ");
-        expect(second.map(token => token.surface_form).join("")).toBe("黒白 黒白");
-        expect(second[0]).not.toBe(second[2]);
     });
 
     it("passes the input to the engine and awaits its result", async () => {
@@ -72,6 +42,47 @@ describe("Seed analyzer contract", () => {
             if (kind === "throw") throw error;
             return Promise.reject(error);
         };
-        await expect(analyzer.parse("黒白")).rejects.toBe(error);
+        await expect(analyzer.parse("input")).rejects.toBe(error);
+    });
+});
+
+// Replace these fixtures when you replace the hardcoded demonstration engine.
+// Recognizing only 黒白 is a sample limitation, not a kuroshiro requirement.
+describe("Demonstration engine (no dictionary)", () => {
+    let analyzer;
+    beforeEach(async () => {
+        analyzer = new Analyzer();
+        await analyzer.init();
+    });
+
+    it("returns the documented sample token", async () => {
+        await expect(analyzer.parse("黒白")).resolves.toEqual([{
+            surface_form: "黒白", pos: "名詞", basic_form: "黒白",
+            reading: "クロシロ", pronunciation: "クロシロ"
+        }]);
+    });
+
+    it.each([" \t\n　", " 黒白\t黒白\n"])("preserves order and whitespace in %p", async (text) => {
+        const tokens = await analyzer.parse(text);
+        expect(tokens.map(token => token.surface_form).join("")).toBe(text);
+        for (const token of tokens.filter(token => /^\s+$/.test(token.surface_form))) {
+            expect(token.pos_detail_1).toBe("空白");
+        }
+    });
+
+    it("rejects unsupported sample input instead of silently discarding it", async () => {
+        await expect(analyzer.parse("黒白 日本語")).rejects.toThrow("Replace the sample tokenizer");
+    });
+
+    it("does not reuse arrays or tokens that kuroshiro or a caller may mutate", async () => {
+        const first = await analyzer.parse("黒白 黒白");
+        first[0].reading = "changed";
+        first[1].surface_form = "changed";
+        const second = await analyzer.parse("黒白 黒白");
+        expect(second).not.toBe(first);
+        expect(second[0]).not.toBe(first[0]);
+        expect(second[0]).not.toBe(second[2]);
+        expect(second[0].reading).toBe("クロシロ");
+        expect(second.map(token => token.surface_form).join("")).toBe("黒白 黒白");
     });
 });

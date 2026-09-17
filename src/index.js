@@ -39,6 +39,40 @@ class Analyzer {
      * Return a Promise of fresh, ordered tokens without dropping input.
      * @param {string} [str=""] Input text
      * @returns {Promise<Array>} Tokens in kuroshiro's analyzer format
+     *
+     * Map your tokenizer's output to the fields below. Only surface_form and
+     * reading (for Japanese tokens) are required; other fields are metadata
+     * to supply when available. The sample engine does not use a dictionary.
+     *
+     * @example Japanese token with optional metadata
+     * [{
+     *     surface_form: "黒白",       // [Required] 表層形 (original text)
+     *     pos: "名詞",                // 品詞 (part of speech)
+     *     pos_detail_1: "一般",       // 品詞細分類1
+     *     pos_detail_2: "*",          // 品詞細分類2
+     *     pos_detail_3: "*",          // 品詞細分類3
+     *     conjugated_type: "*",       // 活用型 (conjugation type)
+     *     conjugated_form: "*",       // 活用形 (conjugation form)
+     *     basic_form: "黒白",         // 基本形 (base form)
+     *     reading: "クロシロ",        // [Required for Japanese tokens] 読み
+     *     pronunciation: "クロシロ",  // 発音 (pronunciation)
+     *     verbose: {}                 // Additional engine-specific data
+     * }]
+     *
+     * @example Whitespace token (no reading required)
+     * [{
+     *     surface_form: " ",
+     *     pos: "記号",
+     *     pos_detail_1: "空白",
+     *     pos_detail_2: "*",
+     *     pos_detail_3: "*",
+     *     conjugated_type: "*",
+     *     conjugated_form: "*",
+     *     basic_form: "*"
+     * }]
+     *
+     * Preserve token order and whitespace so surface_form values reconstruct
+     * the input. Return fresh arrays and objects: kuroshiro may modify them.
      */
     parse(str = "") {
         // A Promise chain propagates both synchronous engine errors and

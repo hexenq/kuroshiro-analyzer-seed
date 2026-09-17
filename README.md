@@ -33,6 +33,8 @@ Each token needs a `surface_form`. Supply kana readings for Japanese tokens, for
 
 Return fresh token objects on each call, since kuroshiro may modify them during conversion.
 
+See the comments on `parse()` in `src/index.js` for the full token field and whitespace examples.
+
 ## Development
 
 - `npm test`: run lint, shared Node/jsdom tests, builds, package checks and integration tests with kuroshiro.
@@ -40,3 +42,5 @@ Return fresh token objects on each call, since kuroshiro may modify them during 
 - `npm pack --dry-run`: inspect the publishable package.
 
 Edit source files rather than generated `lib/` or `dist/` files.
+
+Tests cover the starter interface, demonstration engine and kuroshiro integration, not real Japanese tokenization. Replace the sample fixtures with tests for your chosen tokenizer.

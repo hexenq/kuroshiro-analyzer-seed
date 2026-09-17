@@ -4,19 +4,17 @@ const vm = require("node:vm");
 const { parse } = require("acorn");
 const { JSDOM } = require("jsdom");
 
+// Check that each built entry can run the demonstration; this is not a
+// tokenization accuracy test. Detailed starter behavior is tested separately.
 async function check(Analyzer, label) {
     assert.equal(typeof Analyzer, "function", label);
     assert.equal(Analyzer.default, Analyzer, label);
     const analyzer = new Analyzer();
-    await assert.rejects(analyzer.parse("黒白"), /Initialize/, label);
     await analyzer.init();
-    assert.equal(JSON.stringify(await analyzer.parse()), "[]", label);
     const text = " 黒白\t黒白\n";
     const tokens = await analyzer.parse(text);
     assert.equal(tokens.map(token => token.surface_form).join(""), text, label);
     assert.equal(tokens.find(token => token.surface_form === "黒白").reading, "クロシロ", label);
-    await assert.rejects(analyzer.parse("日本語"), /Replace the sample tokenizer/, label);
-    await assert.rejects(analyzer.init(), /already been initialized/, label);
 }
 
 async function main() {

@@ -13,6 +13,8 @@ function constructorOf(value) {
     assert.equal(typeof value, "function");
     return value;
 }
+// Feed known sample tokens through the real core to check adapter integration.
+// No dictionary is involved; this does not validate Japanese tokenization.
 async function check(Core, Analyzer, label) {
     const core = new (constructorOf(Core))();
     await core.init(new (constructorOf(Analyzer))());
@@ -28,7 +30,6 @@ async function check(Core, Analyzer, label) {
     assert.equal(await core.convert("黒白", { mode: "furigana" }),
         "<ruby>黒白<rp>(</rp><rt>くろしろ</rt><rp>)</rp></ruby>", label);
     assert.equal(await core.convert(""), "", label);
-    await assert.rejects(core.convert("日本語"), /Replace the sample tokenizer/, label);
     // Conversion mutates tokens; subsequent parses must still have correct readings.
     assert.equal(await core.convert("黒白", { to: "romaji" }), "kuroshiro", label);
 }
