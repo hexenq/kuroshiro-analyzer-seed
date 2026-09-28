@@ -1,8 +1,10 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
 const { pathToFileURL } = require("node:url");
 const { JSDOM } = require("jsdom");
+const installPackedPackage = require("./packed-package.cjs");
 
 // Accept another built core package directory for release/integration checks.
 const corePackage = process.env.KUROSHIRO_PACKAGE || "kuroshiro";
@@ -33,18 +35,27 @@ async function check(Core, Analyzer, label) {
     // Conversion mutates tokens; subsequent parses must still have correct readings.
     assert.equal(await core.convert("黒白", { to: "romaji" }), "kuroshiro", label);
 }
-async function main() {
-    await check(require(coreEntry), require(".."), "CommonJS");
-    await check(await import(pathToFileURL(coreEntry).href), await import("../index.js"), "native ESM");
+async function checkPackage(seedRoot) {
+    const seedEntry = path.join(seedRoot, "index.js");
+    await check(require(coreEntry), require(seedEntry), "CommonJS");
+    await check(await import(pathToFileURL(coreEntry).href), await import(pathToFileURL(seedEntry)), "native ESM");
     for (const suffix of [".js", ".min.js"]) {
         const dom = new JSDOM("", { runScripts: "outside-only" });
         try {
             dom.window.eval(fs.readFileSync(path.join(coreRoot, "dist/kuroshiro" + suffix), "utf8"));
-            dom.window.eval(fs.readFileSync(path.join(__dirname, "../dist/kuroshiro-analyzer-seed" + suffix), "utf8"));
+            dom.window.eval(fs.readFileSync(path.join(seedRoot, "dist/kuroshiro-analyzer-seed" + suffix), "utf8"));
             await check(dom.window.Kuroshiro, dom.window.SeedAnalyzer, "browser " + suffix);
         }
         finally { dom.window.close(); }
     }
     console.log("Seed integration passed with core at " + coreRoot);
+}
+async function main() {
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), "seed-joint-"));
+    try {
+        const metadata = installPackedPackage(path.resolve(__dirname, ".."), temp);
+        await checkPackage(path.join(temp, "node_modules", metadata.name));
+    }
+    finally { fs.rmSync(temp, { recursive: true, force: true }); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

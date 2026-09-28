@@ -8,10 +8,8 @@ export default defineConfig(({ mode }) => ({
         lib: {
             entry: "scripts/browser-entry.js",
             name: "SeedAnalyzer",
-            formats: ["umd"],
-            fileName: () => mode === "minify"
-                ? "kuroshiro-analyzer-seed.min.js"
-                : "kuroshiro-analyzer-seed.js"
+            formats: mode === "minify" ? ["umd"] : ["es", "umd"],
+            fileName: format => `kuroshiro-analyzer-seed${mode === "minify" ? ".min" : ""}.${format === "es" ? "mjs" : "js"}`
         }
     }
 }));
